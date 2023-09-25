@@ -1,0 +1,8 @@
+EXERCISE 4
+
+How should the string_compare function be implemented to avoid attacks of this type?
+
+It should be implemented with the same number of cycles for each case. To do that, we can construct an additional loop
+that add cycles to the letters that don´t coincide with the corresponding letter from the word given, so that the number
+of cycles for both types of letters (the ones that coincide and the ones that don´t) are equal. To increase the number
+of cycles we simply add basic or useless operations to our new loop.
