@@ -1,0 +1,170 @@
+{
+  "metadata": {
+    "kernelspec": {
+      "name": "node_nteract",
+      "language": "javascript",
+      "display_name": "Node.js (nteract)"
+    },
+    "kernel_info": {
+      "name": "node_nteract"
+    },
+    "language_info": {
+      "name": "javascript",
+      "version": "8.2.1",
+      "mimetype": "application/javascript",
+      "file_extension": ".js"
+    },
+    "title": "WepSIM ",
+    "nteract": {
+      "version": "nteract-on-jupyter@2.0.0"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "source": "## mode",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "ep",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "mode",
+        "type": "string",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## firmware",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "begin\n{\n  fetch: (T2,C0),\n    \t\t\t(TA, R, BW=11, M1, C1),\n  \t\t\t\t(M2, C2, T1, C3),\n    \t\t\t(A0, B=0, C=0)\n}\n \nlui reg1, U32{ \n \tco = 010010,\n  nwords = 2,\n  reg1 = reg(25,21),\n  U32 = inm(63,32),\n  \n  {\n     (T2, C0, TA, R, BW=11, M1, C1) \n     (T2, C0, TA, R, BW=11, M1, C1) \n     (T1, SelC=10101,LC, M2, C2, A0, B, C=0) \n}\n} \n\nsw reg1, (reg2){ \n  co = 010000,\n  nwords = 1,\n\treg1 = reg(25,21),\n  reg2 = reg(20,16),\n  {\n\t\t(SelA=10000, T9, C0), \n    (SelB=10101, T10, C1), \n    (TA, TD, W, BW=11, A0=1, B=1, C=0), \n}\n}\n\n\nlw reg1, (reg2){\n  co = 010011,\n  nwords= 1,\n  reg1 = reg(25,21),\n  reg2= reg(20,16),\n    {\n    (SelA=10000,T9, C0, TA, R, BW=11, M1, C1)\n  \t(T2, C0, TA, R, BW=11, M1, C1)\n    (SelC=10101, LC, T1, A0,B,C=0)\n}\n}\n\nadd reg1, reg2, reg3 {\n    co = 011000,\n    nwords = 1,\n  \treg1 = reg(25,21),\n    reg2 = reg(20,16),\n    reg3 = reg(15,11),\n  \t\n    {\n      \t(SelCop =1010, MC, SelP =11, M7, C7, T6, SelA = 01011, SelB = 10000, SelC= 10101, LC, A0, B, C=0)\n    } \n}\n\nmul_add reg1, reg2, reg3, reg4 {\n  co = 011001,\n    nwords =1,\n    reg1 = reg(25,21),\n    reg2= reg(20,16),\n    reg3=reg(15,11),\n    reg4= reg(10,6),\n    \n    {\n    \t\t(SelCop= 1100, MC, SelA=10000, SelB=01011, T6, C5)\n        (SelCop =1010, MC, SelA = 00110, MB=1, SelC= 10101, LC, T6, SelP =11, M7, C7, A0, B, C=0)\n}\n}\n\nbeq reg1, reg2, S10 {\n  co = 110100,\n  nwords =1,\n  reg1= reg(25,21),\n  reg2 = reg(20,16),\n  S10 = address(9,0)rel,\n    \n    {\n    \t\t(SelCop = 1011, MC, SelA=10101, SelB= 10000, SelP=11, M7, C7),\n        (MADDR= backtofetch, C=0110, B)\n        (T2, C4)\n  \t\t\t(SIZE = 01010, OFFSET=00000, SE=1, T3, C5)\n  \t\t\t(SelCop=1010, MC, MA, MB, T6, C2, A0, B, C=0)\n  \t\t\t\tbacktofetch:\n  \t\t\t\t\t(A0,B, C=0)\n}\n}\n\njal U16 {\n  co = 100001,\n  nwords = 1,\n  U16 = inm(15,0),\n  {\n    (SelC = 00001, MR, T2, LC),\n    (Size = 10000, Offset=00000, T3, C2, A0, B, C=0)\n}\n}\n\njr_ra {\n  co = 100010,\n  nwords =1,\n    {\n    \t(SelA = 00001, MR, T9, C2,A0, B, C=0)\n}\n}\n\nhalt{\n  co = 100011,\n  nwords =1,\n    {\t\n     (SelA = 00000, MR, T9, C7, C2, A0, B, C=0)\n}\n}\n\nxchb (reg1), (reg2) {\n  co = 011010,\n  nwords = 1,\n  reg1 = reg(25,21),\n  reg2 = reg(20,16),\n    {\n    \t(SelA = 10101, T9, C0)\n      (T9, C0, TA, R, BW =00, C1, M1)\n      (T1, C4)\n  \t\t(T10, C0, SelB= 10000)\n  \t\t(T10, C0, TA, R, BW= 00, C1, M1)\n  \t\t(T9, C0, SelA = 10101)\n  \t\t(T9, C0, TA, W, TD, BW =00)\n  \t\t(T4, C1)\n  \t\t(T10, C0, SelB= 10000)\n  \t\t(T10, C0, TA, W, TD, BW =00, A0, B, C=0)\n  \n}\n}\n\nin reg val {\n\t    co=111111,\n\t    nwords=1,\n\t    reg=reg(25,21),\n\t    val=inm(15,0),\n\t    help='reg = device_registers[val]',\n\t    {\n\t\t(SE=0, OFFSET=0, SIZE=10000, T3=1, C0=1),\n\t\t(TA=1, IOR=1, BW=11, M1=1, C1=1),\n\t\t(T1=1, LC=1,  MR=0, SELC=10101, A0=1, B=1, C=0)\n\t    }\n}\n\nout reg val {\n\t    co=111111,\n\t    nwords=1,\n\t    reg=reg(25,21),\n\t    val=inm(15,0),\n\t    help='device_register[val] = reg',\n\t    {\n\t\t(SE=0, OFFSET=0,   SIZE=10000,   T3=1, C0=1),\n\t\t(MR=0, SELA=10101, T9=1,\t M1=0, C1=1),\n\t\t(TA=1, TD=1,       IOW=1, BW=11, A0=1, B=1, C=0)\n\t    }\n}\n\n  \n\nregisters {\n0=(zero,  x0),\n1=(ra,    x1),\n2=(sp,    x2) (stack_pointer),\n3=(gp,    x3),\n4=(tp,    x4),\n5=(t0,    x5),\n6=(t1,    x6),\n7=(t2,    x7),\n8=(s0,    x8),\n9=(s1,    x9),\n10=(a0,  x10),\n11=(a1,  x11),\n12=(a2,  x12),\n13=(a3,  x13),\n14=(a4,  x14),\n15=(a5,  x15),\n16=(a6,  x16),\n17=(a7,  x17),\n18=(s2,  x18),\n19=(s3,  x19),\n20=(s4,  x20),\n21=(s5,  x21),\n22=(s6,  x22),\n23=(s7,  x23),\n24=(s8,  x24),\n25=(s9,  x25),\n26=(s10, x26),\n27=(s11, x27),\n28=(t3,  x28),\n29=(t4,  x29),\n30=(t5,  x30),\n31=(t6,  x31)\n}",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "firmware",
+        "type": "string",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## assembly",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": ".data\n    msg:   .byte 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,\n                 0,1,0,1,0,1,1,1, 0,1,1,1,0,1,1,1, 0,1,0,1,0,0,0,0,\n                 0,1,0,1,0,1,0,1, 0,1,0,1,0,1,0,1, 0,1,0,1,0,0,0,0,\n                 0,1,1,1,0,1,1,1, 0,1,1,1,0,1,1,1, 0,1,1,1,0,0,0,0,\n                 0,1,0,1,0,1,0,1, 0,1,0,0,0,1,0,0, 0,0,0,1,0,0,0,0,\n                 0,1,0,1,0,1,0,1, 0,1,0,0,0,1,0,0, 0,1,1,1,0,0,0,0,\n                 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,\n                 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,\n\n                 0,1,0,1,0,1,1,1, 0,1,1,1,0,1,1,1, 0,0,0,0,0,0,0,0,\n                 0,1,0,1,0,1,0,0, 0,1,0,1,0,1,0,1, 0,0,0,0,0,0,0,0,\n                 0,1,1,1,0,1,1,1, 0,1,1,1,0,1,0,1, 0,0,0,0,0,0,0,0,\n                 0,0,0,1,0,1,0,0, 0,1,0,1,0,1,1,0, 0,0,0,0,0,0,0,0,\n                 0,1,1,1,0,1,1,1, 0,1,0,1,0,1,0,1, 0,0,0,0,0,0,0,0,\n                 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,\n                 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,\n\n                 0,1,1,1,0,1,1,1, 0,1,1,1,0,1,1,1, 0,0,1,0,0,0,0,0,\n                 0,0,0,1,0,1,0,1, 0,0,0,1,0,0,0,1, 0,0,1,0,0,0,0,0,\n                 0,1,1,1,0,1,0,1, 0,1,1,1,0,1,1,1, 0,0,1,0,0,0,0,0,\n                 0,1,0,0,0,1,0,1, 0,1,0,0,0,1,0,0, 0,0,0,0,0,0,0,0,\n                 0,1,1,1,0,1,1,1, 0,1,1,1,0,1,1,1, 0,0,1,0,0,0,0,0,\n                 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,\n                 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,\n                 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,\n                 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0\n\n.text\n\nmain:  \n   \n   \t\t\tlui a0 msg  # To begin, we print the original image with the \"out\" instruction provided \n        out a0 0x3108\n        lui t5 0x20\n        out t5 0x3104\n        lui ra demo  # We store the address of the function \"demo\" in the ra register \n        jr_ra  # We call the function \"demo\"\n        halt  # This is to finish the program as the PC and SR are set to zero\n        \n \n demo:       # The image can be seen as a 24*24 matrix\n    lui t0 0 # We are going to store the index of the row in t0\n    lui t1 0 # We are going to store the index of the column in t1\n    lui t2 24 # We store a constant value of 24 in t2 to be used later on in the loop\n    lui t5 1  # We save a constant value of 1 in t5 to be used later on in the loop \n    \n loop: beq t2 t0 end  # We do this loop until the row index is equal to 24 \n      mul_add t3 t2 t0 t1  # That is to calculate the position of each byte with respect to the indexes\n      add t3 t3 a0  # We add the position of the corresponding byte with the initial address of the image\n     \tmul_add t4 t2 t1 t0 # Here we do the same as before but interchanging the indexes\n      add t4 t4 a0 # We add the position of this byte with the initial address of the image\n      xchb (t3) (t4) # We use this instruction to swap the content (the bytes) of the two positions we have determined before\n      add t0 t5 t0  # We add 1 to the row index so that we change to the next row\n      lui ra loop # We store the address of the function \"loop\" in the ra register \n\t\t\tjr_ra  # We call the function \"loop\"\n      \nend:    beq t1 t2 stop  # Until the column index is equal to 24, we keep going to the loop\n        add t1 t1 t5    # We add 1 to the column index so that we go to next column\n        add t0 t1 zero  # We store the value of t1 in t0 so that it doesn´t change the bytes that are already modified\n        jr_ra  # We call the function \"loop\"\n  \nstop:\n\t\t\t\tlui a0 1 # We return the value of 1 once all bytes are interchanged, to indicate that everything has work \n        lui t5 msg # We print the modified image with the \"out\" instruction provided\n        out t5 0x3108\n        lui t5 0x20\n        out t5 0x3104\n        lui t6 36 # store 36 in t6 \n        lui ra main # save the address of the \"main\" in the ra register \n        add ra ra t6 # add 36 to the initial address of the main so that it jumps directly to the halt instruction\n        jr_ra  # jumps to the halt instruction\n\t\t\t\n \n \n  \t\t\n        \n        ",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "assembly",
+        "type": "string",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## state_current",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "{\n  \"time\": 1670081508915,\n  \"title\": \"clock 18895 @ &#181;address 0\",\n  \"title_short\": \"clock 18895,<br>&#181;add 0\",\n  \"content\": \"register R1 = 0x8024; register R2 = 0x100000; register R5 = 0x18; register R6 = 0x18; register R7 = 0x18; register R10 = 0x1; register R28 = 0x123f; register R29 = 0x123f; register R30 = 0x20; register R31 = 0x24; memory 0x1018 = 0x1010100; memory 0x101c = 0x101; memory 0x1020 = 0x10101; memory 0x1024 = 0x1000001; memory 0x1028 = 0x1010100; memory 0x1030 = 0x1000000; memory 0x1038 = 0x10000; memory 0x103c = 0x1000001; memory 0x1040 = 0x1000100; memory 0x1048 = 0x1010100; memory 0x104c = 0x101; memory 0x1050 = 0x1010101; memory 0x1054 = 0x1000001; memory 0x1058 = 0x1000101; memory 0x1078 = 0x1010100; memory 0x107c = 0x101; memory 0x1080 = 0x1010101; memory 0x1084 = 0x1000001; memory 0x1088 = 0x1010101; memory 0x1090 = 0x1000100; memory 0x1098 = 0x10001; memory 0x109c = 0x1000001; memory 0x10a0 = 0x1000000; memory 0x10a8 = 0x1010100; memory 0x10ac = 0x101; memory 0x10b0 = 0x10001; memory 0x10b4 = 0x1000001; memory 0x10b8 = 0x1010101; memory 0x10d8 = 0x1010100; memory 0x10dc = 0x101; memory 0x10e0 = 0x1010101; memory 0x10e4 = 0x1000001; memory 0x10e8 = 0x1010100; memory 0x10f0 = 0x1000100; memory 0x10f8 = 0x10001; memory 0x10fc = 0x1000000; memory 0x1100 = 0x1000100; memory 0x1108 = 0x1010100; memory 0x1110 = 0x1010101; memory 0x1114 = 0x1000001; memory 0x1118 = 0x1000101; memory 0x1138 = 0x1010100; memory 0x113c = 0x101; memory 0x1140 = 0x1010101; memory 0x1144 = 0x1000001; memory 0x1148 = 0x1010100; memory 0x1150 = 0x1000100; memory 0x1158 = 0x1000001; memory 0x115c = 0x1000000; memory 0x1160 = 0x1000100; memory 0x1168 = 0x1010100; memory 0x1170 = 0x10101; memory 0x1174 = 0x1000001; memory 0x1178 = 0x1000101; memory 0x1198 = 0x1010100; memory 0x119c = 0x100; memory 0x11b0 = 0x1000000; memory 0x11b4 = 0x100; memory 0x11bc = 0x1000000; memory 0x11c0 = 0x1000101; memory 0x11c8 = 0x1010100; memory 0x11cc = 0x101; memory 0x8000 = 0x49400000; memory 0x8004 = 0x1000; memory 0x8008 = 0x5403108; memory 0x800c = 0x4bc00000; memory 0x8010 = 0x20; memory 0x8014 = 0x7c03104; memory 0x8018 = 0x48200000; memory 0x801c = 0x8028; memory 0x8020 = 0x88000000; memory 0x8024 = 0x8c000000; memory 0x8028 = 0x48a00000; memory 0x8030 = 0x48c00000; memory 0x8038 = 0x48e00000; memory 0x803c = 0x18; memory 0x8040 = 0x4bc00000; memory 0x8044 = 0x1; memory 0x8048 = 0xd0e50024; memory 0x804c = 0x67872980; memory 0x8050 = 0x639c5000; memory 0x8054 = 0x67a73140; memory 0x8058 = 0x63bd5000; memory 0x805c = 0x6b9d0000; memory 0x8060 = 0x60be2800; memory 0x8064 = 0x48200000; memory 0x8068 = 0x8048; memory 0x806c = 0x88000000; memory 0x8070 = 0xd0c7000c; memory 0x8074 = 0x60c6f000; memory 0x8078 = 0x60a60000; memory 0x807c = 0x88000000; memory 0x8080 = 0x49400000; memory 0x8084 = 0x1; memory 0x8088 = 0x4bc00000; memory 0x808c = 0x1000; memory 0x8090 = 0x7c03108; memory 0x8094 = 0x4bc00000; memory 0x8098 = 0x20; memory 0x809c = 0x7c03104; memory 0x80a0 = 0x4be00000; memory 0x80a4 = 0x24; memory 0x80a8 = 0x48200000; memory 0x80ac = 0x8000; memory 0x80b0 = 0x6021f800; memory 0x80b4 = 0x88000000; \"\n}",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "state_current",
+        "type": "object",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## state_history",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "[]",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "state_history",
+        "type": "object",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## record",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "[]",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "record",
+        "type": "object",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## tag",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "12/3/2022, 4:31:30 PM",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "tag",
+        "type": "string",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": "## notify",
+      "metadata": {}
+    },
+    {
+      "cell_type": "code",
+      "source": "true",
+      "outputs": [],
+      "execution_count": 1,
+      "metadata": {
+        "name": "notify",
+        "type": "boolean",
+        "collapsed": false,
+        "deletable": false,
+        "editable": false
+      }
+    }
+  ]
+}
