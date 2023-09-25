@@ -1,0 +1,10 @@
+cd
+abcdba
+cccddd
+ababcdbaba
+abababcdbababa
+aaac
+bd
+abba
+cdba
+ababdc
